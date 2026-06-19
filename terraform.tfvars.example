@@ -1,0 +1,11 @@
+# 기본 인프라 설정
+aws_region  = "us-east-1"
+name_prefix = "maum-diary"
+
+# 데이터베이스 기본 설정
+db_name     = "diarydb"
+db_username = "diaryadmin"
+
+# [경고] 
+# db_password와 flask_secret_key는 이곳에 적지 마세요!
+# 터미널에서 export TF_VAR_db_password="..." 형태로 주입해야 안전합니다.

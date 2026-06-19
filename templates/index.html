@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마음일기</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", "Apple SD Gothic Neo", sans-serif;
+      max-width: 640px; margin: 0 auto; padding: 24px 16px 80px;
+      background: #f6f5f2; color: #2b2b2b; line-height: 1.6;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 4px; }
+    .sub { color: #888; font-size: .9rem; margin-bottom: 24px; }
+    .card {
+      background: #fff; border: 1px solid #e6e3dd; border-radius: 12px;
+      padding: 20px; margin-bottom: 16px;
+    }
+    label { display: block; font-weight: 600; margin: 14px 0 6px; font-size: .95rem; }
+    input[type=text], input[type=password], textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid #d6d2ca;
+      border-radius: 8px; font-size: 1rem; font-family: inherit; background: #fafaf8;
+    }
+    textarea { min-height: 80px; resize: vertical; }
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; }
+    .check { display: flex; align-items: center; gap: 8px; margin: 16px 0; font-size: .95rem; }
+    .check input { width: auto; }
+    button {
+      background: #3a3a3a; color: #fff; border: none; border-radius: 8px;
+      padding: 11px 18px; font-size: 1rem; cursor: pointer; margin-top: 8px;
+    }
+    button:hover { background: #222; }
+    .flash { background: #fde9e7; color: #9b3b32; padding: 10px 14px;
+      border-radius: 8px; margin-bottom: 16px; font-size: .9rem; }
+    .entry { border-top: 1px solid #eee; padding-top: 14px; margin-top: 14px; }
+    .entry:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+    .entry .date { color: #999; font-size: .8rem; }
+    .entry img { max-width: 100%; border-radius: 8px; margin-top: 10px; }
+    .ai { background: #eef3ee; border-left: 3px solid #7a9b7a; padding: 10px 14px;
+      border-radius: 6px; margin-top: 10px; font-size: .92rem; color: #3c5c3c; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; }
+    .ghost { background: none; color: #888; padding: 6px 0; font-size: .85rem; }
+    .badge {
+      position: fixed; bottom: 12px; right: 12px; background: #2b2b2b; color: #b9e3b9;
+      font-size: .72rem; font-family: monospace; padding: 6px 10px; border-radius: 6px;
+      opacity: .9;
+    }
+    .q { color: #555; font-size: .9rem; }
+  </style>
+</head>
+<body>
+
+  {% if messages %}
+    {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+  {% endif %}
+
+  {% if not logged_in %}
+    <!-- ============ 로그인 (닉네임 + 4자리 PIN, 무상태) ============ -->
+    <h1>마음일기</h1>
+    <p class="sub">하루의 끝에서 오늘의 감정을 기록해요.</p>
+    <div class="card">
+      <form action="/login" method="post">
+        <label>닉네임</label>
+        <input type="text" name="nickname" maxlength="50" placeholder="예: 별빛">
+        <label>PIN (숫자 4자리)</label>
+        <input type="password" name="pin" inputmode="numeric" maxlength="4"
+               pattern="[0-9]{4}" placeholder="••••">
+        <button type="submit">기록 시작하기</button>
+      </form>
+      <p class="sub" style="margin-top:14px;">
+        처음 입력한 닉네임은 자동 생성됩니다. 같은 닉네임+PIN으로 내 기록을 다시 볼 수 있어요.
+      </p>
+    </div>
+
+  {% else %}
+    <!-- ============ 일기 작성 + 내 기록 목록 ============ -->
+    <div class="topbar">
+      <h1>{{ nickname }}님의 마음일기</h1>
+      <a href="/logout"><button class="ghost" type="button">로그아웃</button></a>
+    </div>
+    <p class="sub">오늘 하루를 돌아보며 솔직하게 적어보세요.</p>
+
+    <div class="card">
+      <form action="/entry" method="post" enctype="multipart/form-data">
+        <label>{{ questions[0] }}</label>
+        <textarea name="answer1"></textarea>
+
+        <label>{{ questions[1] }}</label>
+        <textarea name="answer2"></textarea>
+
+        <label>오늘의 감정 사진 (선택, 1장)</label>
+        <input type="file" name="photo" accept="image/*">
+
+        <div class="check">
+          <input type="checkbox" name="want_ai" id="want_ai">
+          <label for="want_ai" style="margin:0;font-weight:400;">
+            AI에게 말하기 (감정적 지지/제안 받기) — 체크 안 하면 기록만 합니다
+          </label>
+        </div>
+
+        <button type="submit">기록하기</button>
+      </form>
+    </div>
+
+    {% if entries %}
+    <div class="card">
+      {% for e in entries %}
+        <div class="entry">
+          <div class="date">{{ e.created_at }}</div>
+          {% if e.answer1 %}<p><span class="q">Q. {{ questions[0] }}</span><br>{{ e.answer1 }}</p>{% endif %}
+          {% if e.answer2 %}<p><span class="q">Q. {{ questions[1] }}</span><br>{{ e.answer2 }}</p>{% endif %}
+          {% if e.photo_display_url %}<img src="{{ e.photo_display_url }}" alt="감정 사진">{% endif %}
+          {% if e.ai_response %}<div class="ai">🌿 {{ e.ai_response }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <p class="sub">아직 기록이 없어요. 첫 마음을 적어보세요.</p>
+    {% endif %}
+  {% endif %}
+
+  <!-- 로드밸런싱 증거: 새로고침마다 이 값이 바뀌면 ALB가 다른 EC2로 분산 중 -->
+  <div class="badge">{{ instance.instance_id }} · {{ instance.az }}</div>
+
+</body>
+</html>

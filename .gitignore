@@ -1,0 +1,22 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files (절대 GitHub에 올라가면 안 되는 파일)
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files (비밀번호 등 민감 정보 포함 가능성)
+*.tfvars
+*.tfvars.json
+!*example*.tfvars
+
+# Ignore plan files
+*.out
+
+# .gitignore 파일 내용 확인
+venv/
+.DS_Store
