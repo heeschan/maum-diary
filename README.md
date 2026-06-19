@@ -1,26 +1,25 @@
 # Final Project: Maum Diary Web Service on AWS (ALB + ASG + RDS + S3, Stateless)
 
-기말 프로젝트인 마음일기 웹 서비스는 Terraform을 사용하여 고가용성과 확장성을 갖춘 클라우드 인프라를 구축하였습니다.
+기말 프로젝트인 마음일기 웹 서비스는 Terraform을 사용하여 고가용성과 확장성을 갖춘 클라우드 인프라를 구축한 프로그램입니다.
+
 이전 수업에서 배우고 실습한 ALB, 오토스케일링, RDS 개념을 통합하고, S3와 IAM Role을 사용하여 클라우드 아키텍처를 완성하였습니다.
 
-## Learning Objectives
+## Project Objectives
 
-- Terraform을 활용하여 전체 인프라(네트워크, 컴퓨팅, 데이터베이스, 스토리지)를 코드(IaC)로 프로비저닝한다.
-- 서명된 쿠키(Signed Cookies)를 사용하여 서버 메모리에 의존하지 않는 무상태(Stateless) 세션 로그인을 구현한다.
-- 이미지 파일은 S3에, 텍스트 데이터는 RDS에 분리 저장하여 EC2 인스턴스를 완벽한 무상태로 유지한다.
-- ALB와 ASG를 연동하여 트래픽 분산(Load Balancing) 및 자동 확장(Scale-out), 자동 복구(Self-healing)를 증명한다.
-- 3계층 보안 그룹 분리 및 IAM Role(`LabInstanceProfile`)을 통해 하드코딩된 자격 증명 없이 안전하게 클라우드 리소스를 연결한다.
+- Terraform을 활용하여 전체 인프라(네트워크, 컴퓨팅, 데이터베이스, 스토리지)를 코드로 프로비저닝한다.
+- 서명된 쿠키를 사용하여 서버 메모리에 의존하지 않는 Stateless 세션 로그인을 구현한다.
+- 이미지 파일은 S3에, 텍스트 데이터는 RDS에 분리 저장하여 EC2 인스턴스를 Stateless로 유지한다.
+- ALB와 ASG(오토스케일링)를 연동하여 Load Balancing 및 자동 확장(Scale-out), 자동 복구(Self-healing)를 수행함을 확인한다.
+- 3계층 보안 그룹 분리 및 IAM Role(`LabInstanceProfile`)을 통해 하드코딩된 자격 증명 없이 안전하게 클라우드 리소스를 연결한다. 
 
-## Tech Stack & Frameworks (구현 프레임워크 및 도구)
+## Tech Stack & Frameworks
 
-클라우드 컴퓨팅의 핵심 원리를 애플리케이션 레벨에서 완벽하게 지원하고 증명하기 위해 다음의 기술 스택을 설계에 반영했습니다.
-
-* **Backend Framework (Flask):** 상태(State)를 서버 로컬 메모리나 디스크에 저장하지 않는 '무상태(Stateless) 아키텍처'를 가장 직관적이고 가볍게 구현하기 위해 Python 기반의 Flask를 채택했습니다. 세션 데이터는 암호화된 쿠키로 클라이언트 측에 위임됩니다.
-* **WSGI Production Server (Gunicorn):** Flask의 기본 내장 서버는 동시성 처리에 취약하여 부하 테스트 시 데이터가 오염되거나 병목이 발생할 수 있습니다. ALB를 통한 다중 트래픽 분산과 `ab` 벤치마크 테스트를 프로덕션 수준에서 완벽하게 처리하기 위해 고성능 WSGI 서버인 Gunicorn을 도입했습니다.
-* **AWS SDK (Boto3):** 사진 파일을 EC2 디스크가 아닌 S3 버킷으로 오프로딩(Off-loading)하기 위해 사용했습니다. 코드 내부에 AWS Access Key를 하드코딩하지 않고, EC2에 부여된 IAM Role(`LabInstanceProfile`)의 임시 자격 증명을 자동으로 상속받아 안전하게 통신하도록 설계했습니다.
-* **Database Client (PyMySQL):** EC2 애플리케이션 계층에서 프라이빗 서브넷에 완벽히 격리된 RDS(MySQL) 데이터 계층으로 연결하여 일기 텍스트 데이터를 읽고 쓰기 위해 활용했습니다.
-* **Process Manager (Systemd):** 오토스케일링(ASG)에 의해 새로운 EC2 인스턴스가 띄워지거나 장애 복구로 재부팅될 때, 관리자의 개입 없이 애플리케이션이 백그라운드 데몬으로 자동 기동되는 '자립형 서버'를 구축하기 위해 적용했습니다.
-* **IaC & Testing Tools (Terraform, ApacheBench, jq):** 전체 인프라 배포를 코드로 자동화(IaC)하기 위해 **Terraform**을 사용했으며, CPU 부하를 발생시켜 오토스케일링(Scale-out) 동작을 증명하기 위해 **ApacheBench(`ab`)**를, 터미널 환경에서 AWS CLI의 JSON 반환값을 파싱하여 보안 그룹 격리 등을 검증하기 위해 **`jq`**를 활용했습니다.
+* **Backend Framework (Flask):** 상태를 서버 로컬 메모리나 디스크에 저장하지 않는 Stateless 아키텍처를 가볍게 구현하기 위해 Python 기반의 Flask를 사용하였습니다. 세션 데이터는 암호화된 쿠키로 클라이언트 측에 위임됩니다.
+* **WSGI Production Server (Gunicorn):** Flask의 기본 내장 서버는 동시성 처리에 취약하여 부하 테스트 시 데이터가 오염되거나 병목이 발생할 수 있습니다. ALB를 통한 다중 트래픽 분산과 `ab` 벤치마크 테스트를 수행하기 위해 WSGI 서버인 Gunicorn을 도입했습니다.
+* **AWS SDK (Boto3):** 사진 파일을 EC2 디스크가 아닌 S3 버킷으로 오프로딩하기 위해 사용했습니다. 코드 내부에 AWS Access Key를 하드코딩하지 않고, EC2에 부여된 IAM Role(`LabInstanceProfile`)의 임시 자격 증명을 자동으로 상속받아 안전하게 통신하도록 설계했습니다.
+* **Database Client (PyMySQL):** EC2 응용 계층에서 프라이빗 서브넷에 격리된 RDS(MySQL) 데이터 계층으로 연결하여 일기 텍스트 데이터를 읽고 쓰기 위해 PyMySQL을 사용했습니다.
+* **Process Manager (Systemd):** 오토스케일링에 의해 새로운 EC2 인스턴스가 띄워지거나 장애 복구로 재부팅될 때, 관리자의 개입 없이 프로그램이 백그라운드 데몬으로 자동 구동되는 서버를 구축하기 위해 사용했습니다.
+* **IaC & Testing Tools (Terraform, ApacheBench, jq):** 전체 인프라 배포를 코드로 자동화하기 위해 **Terraform**을 사용했으며, CPU 부하를 발생시켜 Scale-out을 확인하기 위해 **ApacheBench(`ab`)**를, 터미널 환경에서 AWS CLI의 JSON 반환값을 파싱하여 보안 그룹 격리 등을 검증하기 위해 **`jq`**를 활용했습니다.
 
 ## Created Resources
 
@@ -36,17 +35,17 @@ Traffic flow:
 
 - Browser -> ALB (Public HTTP `80`)
 - ALB -> ASG EC2 Instances (Private HTTP `80` 라우팅)
-- EC2 Maum Diary App -> RDS (Private MySQL `3306`)
-- EC2 Maum Diary App -> S3 (HTTPS API via IAM Role)
+- EC2 Maum-Diary -> RDS (Private MySQL `3306`)
+- EC2 Maum-Diary -> S3 (HTTPS API via IAM Role)
 
-RDS 보안 그룹은 오직 EC2 보안 그룹으로부터의 MySQL 트래픽만 허용하며, `publicly_accessible = false`로 설정되어 외부 인터넷으로부터 완전히 격리됩니다. S3 버킷 접근은 코드 내 하드코딩된 키가 아닌 EC2에 부여된 IAM 역할(Role)을 통해 안전하게 이루어집니다.
+RDS 보안 그룹은 오직 EC2 보안 그룹으로부터의 MySQL 트래픽만 허용하며, `publicly_accessible = false`로 설정되어 외부 인터넷으로부터 격리됩니다. S3 버킷 접근은 코드 내 하드코딩된 키가 아닌 EC2에 부여된 IAM 역할(Role)을 통해 안전하게 이루어집니다.
 
-## Difference From Week 10b (06 Lab)
+## Difference From Assignment #6
 
-Week 10b 실습에서는 1대의 단일 EC2 인스턴스에 Apache, PHP, WordPress를 설치하고 외부 RDS와 연결했습니다.
+Assignment #6에서는 1대의 단일 EC2 인스턴스에 Apache, PHP, WordPress를 설치하고 외부 RDS와 연결했습니다.
 이번 기말과제에서는 단일 장애점(SPOF)을 제거하기 위해 **1대의 EC2를 다수의 EC2(ASG)로 대체**하고 그 앞에 **ALB**를 배치했습니다.
 
-단일 서버가 아니기 때문에 웹 서버 내부에 데이터를 저장하면 다른 서버와 동기화되지 않는 문제가 발생합니다. 이를 해결하기 위해 Flask 애플리케이션을 완벽한 **무상태(Stateless)** 로 재설계했습니다.
+단일 서버가 아니기 때문에 웹 서버 내부에 데이터를 저장하면 다른 서버와 동기화되지 않는 문제가 발생합니다. 이를 해결하기 위해 Flask 애플리케이션을 **Stateless** 로 재설계했습니다.
 - **세션 상태:** 로컬 메모리 대신 클라이언트의 서명된 쿠키를 활용.
 - **미디어 파일:** EC2 디스크 대신 S3 버킷으로 오프로딩.
 - **웹 서버 구동:** 동시성 처리가 불안정한 개발 서버 대신 `Gunicorn` WSGI 프로덕션 데몬 사용.

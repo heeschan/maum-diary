@@ -29,9 +29,9 @@ Interpretation:
 
 ```bash
 # AWS Academy 임시 자격 증명 설정 (터미널에 직접 입력)
-export AWS_ACCESS_KEY_ID="본인의_액세스_키"
-export AWS_SECRET_ACCESS_KEY="본인의_시크릿_키"
-export AWS_SESSION_TOKEN="본인의_세션_토큰"
+export AWS_ACCESS_KEY_ID="<access-key-id>"
+export AWS_SECRET_ACCESS_KEY="<secret-access-key>"
+export AWS_SESSION_TOKEN="<session-token>"
 
 # 민감한 DB 비밀번호 및 Flask 세션 키 환경 변수 주입
 export TF_VAR_db_password="MaumDiary!!"
