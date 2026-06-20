@@ -1,5 +1,5 @@
 # 구현 완료 여부
-[ ] README.md
+[x] README.md
 [ ] commands.md
 [ ] report.md
 [ ] finished.txt

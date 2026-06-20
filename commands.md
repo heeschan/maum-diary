@@ -23,6 +23,17 @@ jq --version
 
 Key Output:
 
+```hcl
+aws-cli/2.34.16 Python/3.14.3 Darwin/25.3.0 exe/arm64
+
+Terraform v1.15.1
+on darwin_arm64
+
+This is ApacheBench, Version 2.3 <$Revision: 1923142 $>
+
+jq-1.7.1-apple
+```
+
 Interpretation:
 
 ## 1. Preflight
