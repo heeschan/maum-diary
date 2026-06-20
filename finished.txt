@@ -1,0 +1,25 @@
+Assignment: Final Project. Maum Diary 3-Tier Architecture with Terraform
+Status: Completed
+
+[Student Info]
+Name: 정희찬
+Student ID: 32224315
+
+[Completion Status]
+- maum-diary-terraform-infrastructure: Completed
+
+[Final Output Metrics]
+- Target ALB DNS: http://maum-diary-alb-1844701264.us-east-1.elb.amazonaws.com
+- Target RDS Endpoint: maum-diary-mysql.ca1houlpzljb.us-east-1.rds.amazonaws.com
+- Target S3 Bucket: maum-diary-photos-bucket-32224315
+- Total Provisioned Resources: 12
+
+[Notes]
+- ALB, ASG, RDS, S3를 활용한 3계층(3-Tier) 아키텍처를 Terraform으로 완벽히 프로비저닝했다.
+- 사용자 업로드 이미지를 S3로 오프로딩하여 애플리케이션의 Stateless 구조를 확보했다.
+- RDS 퍼블릭 접근을 차단하고 네트워크 보안 그룹을 분리하여 데이터 계층을 안전하게 격리했다.
+- IAM 역할(LabInstanceProfile)을 EC2에 매핑하여 소스 코드 내 자격 증명 하드코딩 없이 S3 접근 권한을 위임했다.
+- ALB 라운드 로빈 트래픽 분산과 ASG 기반의 자동 장애 복구(Self-Healing) 동작을 확인했다.
+- ApacheBench를 이용한 인위적 트래픽 부하 테스트를 통해 CloudWatch 경보 및 Scale-out 모니터링 시스템을 검증했다.
+- 환경 변수(.env)와 .gitignore를 활용해 비밀번호 및 상태 파일(.tfstate)의 외부 유출을 방지했다.
+- 모든 리소스 구축 및 검증 완료 후 'terraform destroy'를 실행하여 12개의 리소스를 정상적으로 삭제했다.
