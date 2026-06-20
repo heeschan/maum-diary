@@ -123,12 +123,14 @@ terraform output -raw alb_dns_name
 
 ## Verification Scenarios
 
-다음의 여러 가지 시나리오를 터미널 및 콘솔에서 직접 검증할 수 있습니다. (자세한 명령어는 commands.md 참조)
+다음의 여러 가지 시나리오를 터미널 및 콘솔에서 직접 검증할 수 있습니다. (자세한 명령어와 실행 방식은 commands.md 참조)
 
-- **보안성 검증:** 로컬에서 nc 명령어로 RDS 직접 접속이 차단되는지 확인.
-- **로드밸런싱 검증:** ALB 주소로 여러 번 요청하여 응답하는 EC2의 인스턴스 ID와 AZ가 바뀌는지 확인.
-- **고가용성 검증 (Fault Tolerance):** AWS CLI로 특정 EC2 인스턴스를 강제 종료(terminate)한 뒤 서비스가 중단되지 않고 ASG가 새 인스턴스를 띄우는지 확인.
-- **확장성 검증 (Auto Scaling):** ab (ApacheBench) 툴을 이용해 /bench 엔드포인트에 부하를 발생시키고 Scale-out이 일어나는지 확인.
+- 애플리케이션 및 DB 상태 검증 (App Health & RDS Status): ALB의 헬스체크 엔드포인트(/health)가 정상 응답(200 OK)을 반환하는지 확인하고, RDS 인스턴스가 PubliclyAccessible = false 상태로 프라이빗 서브넷에 안전하게 격리되어 기동 중인지 검증합니다.
+- 보안 격리 및 권한 검증 (Security Group & IAM Role): RDS 보안 그룹이 외부 인터넷 접근을 완전 차단하고 오직 웹 서버(EC2 SG) 트래픽만 허용하는지 확인합니다. 또한 S3 접근을 위해 Launch Template에 LabInstanceProfile IAM 역할이 정상 바인딩되었는지 검증합니다.
+- S3 사진 업로드 및 객체 오프로딩 검증 (S3 Object Upload Verification): 웹 브라우저(ALB 주소)로 서비스에 접속하여 사진을 첨부한 일기를 작성한 후, AWS CLI 명령어를 통해 해당 이미지 객체가 EC2 로컬 디스크가 아닌 AWS S3 버킷 내에 물리적으로 분리 저장(Off-loading)되었음을 확인하여 무상태성의 핵심 요소를 증명합니다.
+- 분산 처리 검증 (Stateless Load Balancing): 로드밸런서(ALB) 웹 주소로 연속 트래픽을 송신할 때, 요청이 가용 영역(AZ) A와 B에 배치된 가상 인스턴스들로 라운드 로빈 방식을 통해 균등하게 분산 처리되는지 증명합니다.
+- 장애 주입 및 자동 복구 검증 (Fault Tolerance & Self-Healing): 기동 중인 가상 인스턴스 중 하나를 강제 종료(terminate)하여 인위적 장애 상황을 연출한 뒤, 서비스 중단(Downtime) 없이 무중단 운영이 유지되는지 확인하고 ASG가 이를 감지해 자동으로 새로운 서버를 가용 상태로 복구(Self-healing)하는지 증명합니다.
+- 오토스케일링 부하 테스트 증명 (Scalability Verification): ApacheBench(ab) 스트레스 도구를 활용해 동시성 대량 가상 요청을 발생시켜 가상 서버의 CPU 부하를 유도하고, CloudWatch 경보와 연동되어 ASG 자원이 동적으로 자동 확장(Scale-out)되는 인프라 탄력성을 최종 증명합니다.
 
 ## AWS Academy Notes
 

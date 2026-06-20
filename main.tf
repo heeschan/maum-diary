@@ -202,7 +202,7 @@ resource "aws_launch_template" "app" {
 }
 
 resource "aws_autoscaling_group" "asg" {
-  name_prefix         = "${var.name_prefix}-asg-"
+  name_prefix = "${var.name_prefix}-asg-"
   launch_template {
     id      = aws_launch_template.app.id
     version = "$Latest"
